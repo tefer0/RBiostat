@@ -138,11 +138,13 @@ par(mfrow=c(2,2))
 plot(kmd$x,kmd$y,pch=16)
 
 plot(kmd$x,kmd$y,col=group,pch=16)
-model <- kmeans(data.frame(x,y),6)
+model <- kmeans(data.frame(x,y),6)#6 clusters
 plot(kmd$x,kmd$y,col=model[[1]])
-model <- kmeans(data.frame(x,y),4)
+model <- kmeans(data.frame(x,y),4)#4 clusters
 plot(kmd$x,kmd$y,col=model[[1]])
 par(mfrow=c(1,1))
+model <- kmeans(data.frame(kmd$x,kmd$y),6)
+table(model[[1]],group)
 
 #Hierarchical
 taxa <- read.table("taxon.txt",header=T)
@@ -156,3 +158,41 @@ plot(hclust(dist(taxa)),main="")
 library(MASS)
 model <- lda(Taxon~.,taxa)
 plot(model,col=rep(1:4,each=30))
+
+#PCA101 -----
+pgdata <- read.table('pgfull.txt',header = T)
+pgd <- pgdata[,1:54]
+model <- prcomp(pgd,scale=TRUE) #prcomp-PCA
+summary(model)
+
+plot(model,main="Scree plot for PCA",col="red")
+biplot(model)
+
+yv <- predict(model)[,1]
+yv2 <- predict(model)[,2]
+par(mfrow=c(1,2))
+plot(pgdata$hay,yv,pch=16,xlab="biomass",ylab="PC 1",col="red")
+plot(pgdata$pH,yv2,pch=16,xlab="soil pH",ylab="PC 2",col="blue")
+
+#factor analysis
+factanal(pgd,8)
+#Rsqrd coefficient of determination,strength strong pos or neg
+
+model <- factanal(pgd,8)
+par(mfrow=c(2,2))
+plot(loadings(model)[,1], loadings(model)[,2],pch=16,xlab="Factor 1",
+     ylab="Factor 2", col="blue")
+plot(loadings(model)[,1], loadings(model)[,3],pch=16,xlab="Factor 1",
+     ylab="Factor 3", col="red")
+plot(loadings(model)[,1], loadings(model)[,4],pch=16,xlab="Factor 1",
+     ylab="Factor 4", col="green")
+plot(loadings(model)[,1], loadings(model)[,5],pch=16,xlab="Factor 1",
+     ylab="Factor 5", col="brown")
+
+#splitting up cluster
+pgdata <- read.table("pgfull.txt",header=T)
+attach(pgdata)
+labels <- paste(plot,letters[lime],sep="")
+hpg <- hclust(dist(pgdata[,1:54]))
+plot(hpg,labels=labels,main= "")
+plot(hclust(dist(taxa)),main="")
